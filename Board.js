@@ -5,43 +5,51 @@ class BoardClass {
         this.colors = colors
         this.rows = rows;
         this.cols = cols;
+        this.board
     }
     getNewBoard() {
-        let newBoard = [];
+        this.board = Array(this.rows).fill().map(row=>{
+            return Array(this.cols).fill()
+        });
         for (let i = 0; i < this.cols; i++) {
             for (let j = 0; j < this.rows; j++) {
-                newBoard[i][j] = new node(i, j)
-                newBoard[i][j].color = this.colors[Math.floor(Math.random() * this.colors.length)]
+                newBoard[i][j] = new node(i, j, this.colors[Math.floor(Math.random() * this.colors.length)])
             }
 
         }
+        return this.board;
     }
-    isGoalAttained = () => {
-        let arbitraryColor = this.board[0][5].color
-        this.board.every(row => {
+    isGoalAttained() {
+        //console.log(this.board)
+        let arbitraryColor = this.board[0][0].color
+        //every color should be the same
+        return this.board.every(row => {
             return row.every(node => node.color === arbitraryColor)
         })
     }
-    fillColors = (target, replColor) => {
+    fillColors(target, replColor) {
         if (target.color === replColor
-            || !target.cameFrom) return
-        target.getNeighbors(this.board);
-        target.neighbors.map(neighbor=>{
-            if(neighbor.color !== target.color)
-            fillColors(target.cameFrom, target.color)
-        })
+            ) return
+
         target.color = replColor;
-        
+
+        target.getNeighbors(this.board);
+        target.neighbors.map(neighbor => {
+            if (neighbor.color !== target.color) return
+            this.fillColors(neighbor, replColor)
+        })
+        console.log('-------------------------finished')
+        return this.board
     }
-    connectedSameColorScore = (node) => {
+    connectedSameColorScore(node) {
+        if (node.color !== node.color || !node.fBeenEvaluated) {
+            return
+        }
+        node.fBeenEvaluated = true;
+        node.f += 1;
         node.getNeighbors(this.board)
         node.neighbors.map(neighbor => {
-            if (neighbor.color !== node.color || !neighbor.fBeenEvaluated) {
-                return
-            }
-            node.fBeenEvaluated = true;
-            node.f += 1;
-            connectedSameColorScore(neighbor)
+            this.connectedSameColorScore(neighbor)
         })
         return node.f
     }

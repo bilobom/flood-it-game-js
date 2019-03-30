@@ -5,7 +5,6 @@ let Board = require('./Board')
 
 
 
-
 const solveTheGame = (board) => {
     const start = board[0][0]
 
@@ -26,7 +25,6 @@ const solveTheGame = (board) => {
         board.fillColors(current.cameFrom, current.color)
 
         if (board.isGoalAttained) {
-            console.log('done');
             break;
         }
         openSet = openSet.filter((node) => current !== node)
@@ -54,8 +52,7 @@ const solveTheGame = (board) => {
 
         })
     }
+    return board;
 }
 
-module.exports = {
-    solveTheGame,
-}
+module.exports = solveTheGame

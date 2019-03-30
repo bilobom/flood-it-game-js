@@ -1,12 +1,13 @@
-const node = (x, y) => {
-    this.x = x;
-    this.y = y;
-    this.f = 1;
-    this.neighbors;
-    this.color;
-    this.cameFrom = null;
-    this.neighbors;
-    getNeighbors = (board) => {
+class NodeClass{
+    constructor(x,y,color){
+        this.x = x;
+        this.y = y;
+        this.f = 1;
+        this.color=color;
+        this.cameFrom = null;
+        this.neighbors=[];
+    }
+    getNeighbors (board) {
         if (this.x > 0)
             this.neighbors.push(board[this.x - 1][this.y])
         if (this.x < board.col - 1)
@@ -18,4 +19,6 @@ const node = (x, y) => {
         return this.neighbors
     }
 }
-module.exports= node;
+
+
+module.exports= NodeClass;

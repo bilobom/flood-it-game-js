@@ -1,48 +1,93 @@
-const { expect} = require('chai');
+const { expect } = require('chai');
+const sinon = require('sinon')
 const Board = require('./Board')
-const game = require('./game')
+const gameSolver = require('./game')
+const node = require('./node')
+/*
+_________________________
+|red    |green  |green  |
+|       |       |       |
+|green  |red    |red    |
+|       |       |       |
+|green  |green  |yellow |
+|_______|_______|_______|
 
-
-
-
-describe('The Popular Game',  ()=> {
-
-    let mockedBoard = [ ['green', 'red', 'yellow', 'red', 'red', 'green'],
-                        ['red', 'yellow', 'yellow', 'yellow', 'red', 'green'],
-                        ['green', 'red', 'green', 'green', 'red', 'green'],
-                        ['yellow', 'green', 'green', 'red', 'red', 'yellow'],
-                        ['yellow', 'red', 'green', 'green', 'green', 'green'],
-                        ['green', 'red', 'green', 'yellow', 'yellow', 'red']]
-
-    describe('The board',  ()=> {
-        it('should create new board with dimension 6', () => {
-            expect(new Board().getNewBoard()[0].length)
-            .to.be.equal(6)
-        });
-
-        it('shouldt be filled all , ie: the goal of the game', () => {
-            expect(mockedBoard.isGoalAttained)
-                .to.be.equal(false)
-        });
-
-        it('should fill the colors', () => {
-            expect(mockedBoard.isGoalAttained)
-                .to.be.equal(false)
-        });//fillColors
-
+*/
+describe('The Popular Game', () => {
+    var injectedBoard = [
+        [
+            { x: 0, y: 0, f: 1, color: 'red' },
+            { x: 0, y: 1, f: 1, color: 'green' },
+            { x: 0, y: 2, f: 1, color: 'green' }
+        ],
+        [
+            { x: 1, y: 0, f: 1, color: 'green' },
+            { x: 1, y: 1, f: 1, color: 'red' },
+            { x: 1, y: 2, f: 1, color: 'red' }],
+        [
+            { x: 2, y: 0, f: 1, color: 'green' },
+            { x: 2, y: 1, f: 1, color: 'green' },
+            { x: 2, y: 2, f: 1, color: 'yellow' }
+        ]
+    ]
+    injectedBoard = injectedBoard.map((row)=>{
+        return row.map((ele)=>{
+            const {x,y,color}= ele
+            return new node(x,y,color)
+        })
+    })
+    //stub getNewBoard to return me the mocked board instance
+        
+    let mockedBoard;
+    sinon.stub(Board.prototype, 'getNewBoard').callsFake(() =>{
+        return injectedBoard;
     });
-    describe('The Game', () => {
-        it('gets adjacent colors of a tile', () => {
-            let adjacents = game.getAdjacentColors({ x: 0, y: 0 }, mockedBoard);
-            expect(adjacents[0].color).to.be.equal('red');
-            expect(adjacents[1].color).to.be.equal('red');
+    describe('The board', () => {
+        beforeEach(() => {
+            mockedBoard  = new Board(undefined, 3, 3)
+            mockedBoard.board = mockedBoard.getNewBoard();
+        });
+        it('should create new board', () => {
+            //console.log(new Board(undefined, 3, 3).isGoalAttained())
+            expect(new Board(undefined, 3, 3).getNewBoard()[0].length)
+                .to.be.equal(3)
         });
 
-        it('most colors in adjacents ', () => {
-            let mostColor = game.getMostColor(mockedBoard);
-            expect(mostColor).to.be.equal('red');
+        it('shouldt be filled all with same color , ie: the goal of the game', () => {
+            expect(mockedBoard.isGoalAttained())
+                .to.be.equal(false)
+        });
+
+        it('should fill all connected node with the color', () => {
+            console.log('----',mockedBoard.fillColors(mockedBoard.board[1][1], 'green'))
+            let boardAfterFilling = mockedBoard.fillColors(mockedBoard.board[1][1], 'green')
+            console.log(boardAfterFilling)
+            expect(boardAfterFilling)
+                .to.be.equal('green')
+        });
+
+
+        it('should get the correct cost or score for a node', () => {
+            expect(mockedBoard.connectedSameColorScore(mockedBoard.board[2][1]))
+                .to.be.equal(3)
+            expect(mockedBoard.connectedSameColorScore(mockedBoard.board[1][2]))
+                .to.be.equal(2)
+        });
+    });
+    describe('A node', () => {
+        it('should get the right neighbors', () => {
+            expect(mockedBoard.board[1][2].getNeighbors()[0])
+                .to.deep.include({ x: 0, y: 2, f: 1, color: 'green' });
+            expect(mockedBoard.board[1][2].getNeighbors()[2])
+                .to.deep.include({ x: 2, y: 2, f: 1, color: 'yellow' });
+        });
+    });
+    describe('The Game Solver', () => {
+        it('should solve the game and reach the goal ', () => {
+            expect(gameSolver(mockedBoard).isGoalAttained())
+                .to.be.equal(true)
         });
     })
-    
+
 
 });
