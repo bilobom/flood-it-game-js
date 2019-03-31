@@ -5,10 +5,10 @@ class BoardClass {
         this.colors = colors
         this.rows = rows;
         this.cols = cols;
-        this.board
+        this.board;
     }
     getNewBoard() {
-        this.board = Array(this.rows).fill().map(row=>{
+        this.board = Array(this.rows).fill().map(row => {
             return Array(this.cols).fill()
         });
         for (let i = 0; i < this.cols; i++) {
@@ -22,36 +22,37 @@ class BoardClass {
     isGoalAttained() {
         //console.log(this.board)
         let arbitraryColor = this.board[0][0].color
-        //every color should be the same
+        //every item should have that color
         return this.board.every(row => {
             return row.every(node => node.color === arbitraryColor)
         })
     }
     fillColors(target, replColor) {
-        if (target.color === replColor
-            ) return
-
+        if (target.color === replColor) return
+        let targetColor = target.color
         target.color = replColor;
+        target.getNeighbors(this);
 
-        target.getNeighbors(this.board);
         target.neighbors.map(neighbor => {
-            if (neighbor.color !== target.color) return
+            if (neighbor.color !== targetColor) return
+
             this.fillColors(neighbor, replColor)
         })
-        console.log('-------------------------finished')
-        return this.board
     }
     connectedSameColorScore(node) {
-        if (node.color !== node.color || !node.fBeenEvaluated) {
-            return
+        let score = 1;
+        if (node.fBeenEvaluated ) {
+            return 0
         }
+        
         node.fBeenEvaluated = true;
-        node.f += 1;
-        node.getNeighbors(this.board)
+        node.getNeighbors(this)
         node.neighbors.map(neighbor => {
-            this.connectedSameColorScore(neighbor)
+            if (neighbor.color !== node.color) return
+            score+= this.connectedSameColorScore(neighbor)
         })
-        return node.f
+        node.fBeenEvaluated = false;
+        return score;
     }
 }
 module.exports = BoardClass
